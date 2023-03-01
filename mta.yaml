@@ -1,0 +1,73 @@
+_schema-version: "3.2"
+ID: bankKeyValidate
+version: 0.0.1
+modules:
+- name: workflow-module
+  type: com.sap.application.content
+  path: workflow-module
+  requires:
+  - name: sap_processautomation
+    parameters:
+      content-target: true
+      service-key:
+        config:
+          deployUsageScenario: workflow
+        name: spa-workflow-service-key
+- name: bankKeyValidate-destination-content
+  type: com.sap.application.content
+  requires:
+  - name: bankKeyValidate-destination-service
+    parameters:
+      content-target: true
+  - name: bankKeyValidate_html_repo_host
+    parameters:
+      service-key:
+        name: bankKeyValidate_html_repo_host-key
+  - name: uaa_bankKeyValidate
+    parameters:
+      service-key:
+        name: uaa_bankKeyValidate-key
+  parameters:
+    content:
+      instance:
+        destinations:
+        - Name: synopsys_ariba_bankKeyValidate_html_repo_host
+          ServiceInstanceName: bankKeyValidate-html5-app-host-service
+          ServiceKeyName: bankKeyValidate_html_repo_host-key
+          sap.cloud.service: synopsys_ariba
+        - Authentication: OAuth2UserTokenExchange
+          Name: synopsys_ariba_uaa_bankKeyValidate
+          ServiceInstanceName: bankKeyValidate-xsuaa-service
+          ServiceKeyName: uaa_bankKeyValidate-key
+          sap.cloud.service: synopsys_ariba
+        existing_destinations_policy: ignore
+  build-parameters:
+    no-source: true
+resources:
+- name: sap_processautomation
+  type: org.cloudfoundry.managed-service
+  parameters:
+    service: process-automation-service
+    service-plan: standard
+- name: bankKeyValidate-destination-service
+  type: org.cloudfoundry.managed-service
+  parameters:
+    config:
+      HTML5Runtime_enabled: true
+      version: 1.0.0
+    service: destination
+    service-name: bankKeyValidate-destination-service
+    service-plan: lite
+- name: bankKeyValidate_html_repo_host
+  type: org.cloudfoundry.managed-service
+  parameters:
+    service: html5-apps-repo
+    service-name: bankKeyValidate-html5-app-host-service
+    service-plan: app-host
+- name: uaa_bankKeyValidate
+  type: org.cloudfoundry.managed-service
+  parameters:
+    path: ./xs-security.json
+    service: xsuaa
+    service-name: bankKeyValidate-xsuaa-service
+    service-plan: application
